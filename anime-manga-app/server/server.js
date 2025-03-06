@@ -327,3 +327,43 @@ app.delete('/api/user/:userId/manga/:mangaId', async (req, res) => {
     }
 });
 
+
+// Add this endpoint to your server.js file after the other API endpoints
+
+// Endpoint to update the status of an item in the user's list
+app.put('/api/list/status', async (req, res) => {
+    const { userId, externalId, contentType, status } = req.body;
+  
+    if (!userId || !externalId || !contentType || !status) {
+      return res.status(400).json({ message: 'All fields are required.' });
+    }
+    
+    // Validate that status is one of the allowed values
+    const validStatuses = ['plan_to_watch', 'watching', 'completed', 'on_hold', 'dropped'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value.' });
+    }
+  
+    try {
+      connection.query(
+        'UPDATE user_lists SET status = ? WHERE user_id = ? AND external_id = ? AND content_type = ?',
+        [status, userId, externalId, contentType],
+        (err, results) => {
+          if (err) {
+            console.error('Error updating item status:', err);
+            return res.status(500).json({ message: 'Error updating status.' });
+          }
+  
+          if (results.affectedRows === 0) {
+            return res.status(404).json({ message: 'Item not found in your list.' });
+          }
+  
+          res.json({ message: 'Status updated successfully.' });
+        }
+      );
+    } catch (error) {
+      console.error('Error updating item status:', error);
+      res.status(500).json({ message: 'Error updating status.' });
+    }
+  });
+

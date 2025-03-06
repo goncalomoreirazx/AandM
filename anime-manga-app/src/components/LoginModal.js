@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import loginlogo from '../assets/loginlogo.png';
 
 export default function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -76,12 +82,12 @@ export default function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
                         onChange={(e) => setEmail(e.target.value)}
                       />
                     </div>
-                    <div>
+                    <div className="relative">
                       <label htmlFor="password" className="sr-only">Senha</label>
                       <input
                         id="password"
                         name="password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         autoComplete="current-password"
                         required
                         className="relative block w-full appearance-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
@@ -89,6 +95,17 @@ export default function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                       />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+                        onClick={togglePasswordVisibility}
+                      >
+                        {showPassword ? (
+                          <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                        ) : (
+                          <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                        )}
+                      </button>
                     </div>
                   </div>
                   <div className="text-sm text-right">

@@ -1,7 +1,9 @@
 import axios from 'axios';
+import jikanApi from './apiService';
 
-const JikanAPI = axios.create({
-  baseURL: 'https://api.jikan.moe/v4', 
+// Create a custom instance for non-Jikan API calls
+const customAPI = axios.create({
+  baseURL: 'http://localhost:3000', 
 });
 
 // ANIME FUNCTIONS
@@ -9,8 +11,8 @@ const JikanAPI = axios.create({
 // Busca animes por nome
 export const searchAnime = async (query) => {
   try {
-    const response = await JikanAPI.get('/anime', { params: { q: query } });
-    return response.data.data;
+    const data = await jikanApi.get('/anime', `jikan_search_anime_${query}`, 60, { q: query });
+    return data;
   } catch (error) {
     console.error("Erro ao buscar animes:", error);
     throw error;
@@ -20,8 +22,8 @@ export const searchAnime = async (query) => {
 // Busca anime por ID
 export const getAnimeById = async (id) => {
   try {
-    const response = await JikanAPI.get(`/anime/${id}`);
-    return response.data.data;
+    const data = await jikanApi.get(`/anime/${id}`, `jikan_anime_${id}`, 60 * 24); // Cache for 24 hours
+    return data;
   } catch (error) {
     console.error("Erro ao buscar anime por ID:", error);
     throw error;
@@ -31,8 +33,8 @@ export const getAnimeById = async (id) => {
 // Busca animes por gênero
 export const getAnimeByGenre = async (genreId) => {
   try {
-    const response = await JikanAPI.get('/anime', { params: { genres: genreId } });
-    return response.data.data;
+    const data = await jikanApi.get('/anime', `jikan_anime_genre_${genreId}`, 60, { genres: genreId });
+    return data;
   } catch (error) {
     console.error("Erro ao buscar animes por gênero:", error);
     throw error;
@@ -42,8 +44,8 @@ export const getAnimeByGenre = async (genreId) => {
 // Lista de gêneros de animes
 export const getGenres = async () => {
   try {
-    const response = await JikanAPI.get('/genres/anime');
-    return response.data.data;
+    const data = await jikanApi.get('/genres/anime', 'jikan_anime_genres', 60 * 24 * 7); // Cache for a week
+    return data;
   } catch (error) {
     console.error('Erro ao buscar gêneros:', error);
     throw error;
@@ -53,8 +55,8 @@ export const getGenres = async () => {
 // Busca animes de um estúdio específico
 export const getAnimeByStudio = async (studioId) => {
   try {
-    const response = await JikanAPI.get(`/studios/${studioId}/anime`);
-    return response.data.data;
+    const data = await jikanApi.get(`/studios/${studioId}/anime`, `jikan_studio_${studioId}`, 60 * 24);
+    return data;
   } catch (error) {
     console.error('Erro ao buscar animes por estúdio:', error);
     throw error;
@@ -64,10 +66,21 @@ export const getAnimeByStudio = async (studioId) => {
 // Top animes com paginação
 export const getTopAnimes = async (limit = 25, page = 1) => {
   try {
-    const response = await JikanAPI.get('/top/anime', { params: { limit, page } });
-    return response.data.data;
+    const data = await jikanApi.get('/top/anime', `jikan_top_anime_${page}_${limit}`, 60 * 3, { limit, page });
+    return data;
   } catch (error) {
     console.error("Erro ao buscar os top animes:", error);
+    throw error;
+  }
+};
+
+// Seasonal animes
+export const getSeasonalAnimes = async (limit = 10) => {
+  try {
+    const data = await jikanApi.get('/seasons/now', 'jikan_seasonal_anime', 60 * 24, { limit });
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar animes da temporada:", error);
     throw error;
   }
 };
@@ -77,20 +90,19 @@ export const getTopAnimes = async (limit = 25, page = 1) => {
 // Busca mangas por nome
 export const searchManga = async (query) => {
   try {
-    const response = await JikanAPI.get('/manga', { params: { q: query } });  // No limit parameter
-    return response.data.data;
+    const data = await jikanApi.get('/manga', `jikan_search_manga_${query}`, 60, { q: query });
+    return data;
   } catch (error) {
     console.error("Erro ao buscar manga:", error);
     throw error;
   }
 };
 
-
 // Top mangas
 export const getTopManga = async (page = 1, limit = 25) => {
   try {
-    const response = await JikanAPI.get('/top/manga', { params: { page, limit } });
-    return response.data.data;
+    const data = await jikanApi.get('/top/manga', `jikan_top_manga_${page}_${limit}`, 60 * 3, { page, limit });
+    return data;
   } catch (error) {
     console.error("Erro ao buscar top mangas:", error);
     throw error;
@@ -100,8 +112,8 @@ export const getTopManga = async (page = 1, limit = 25) => {
 // Busca manga por ID
 export const getMangaById = async (id) => {
   try {
-    const response = await JikanAPI.get(`/manga/${id}`);
-    return response.data.data;
+    const data = await jikanApi.get(`/manga/${id}`, `jikan_manga_${id}`, 60 * 24);
+    return data;
   } catch (error) {
     console.error("Erro ao buscar manga por ID:", error);
     throw error;
@@ -111,8 +123,8 @@ export const getMangaById = async (id) => {
 // Lista de gêneros de mangas
 export const getMangaGenres = async () => {
   try {
-    const response = await JikanAPI.get('/genres/manga');
-    return response.data.data;
+    const data = await jikanApi.get('/genres/manga', 'jikan_manga_genres', 60 * 24 * 7);
+    return data;
   } catch (error) {
     console.error("Erro ao buscar gêneros de mangas:", error);
     throw error;
@@ -122,8 +134,8 @@ export const getMangaGenres = async () => {
 // Busca mangas por gênero
 export const getMangaByGenre = async (genreId) => {
   try {
-    const response = await JikanAPI.get('/manga', { params: { genres: genreId } });
-    return response.data.data;
+    const data = await jikanApi.get('/manga', `jikan_manga_genre_${genreId}`, 60, { genres: genreId });
+    return data;
   } catch (error) {
     console.error("Erro ao buscar mangas por gênero:", error);
     throw error;
@@ -133,8 +145,8 @@ export const getMangaByGenre = async (genreId) => {
 // Busca notícias de animes
 export const getAnimeNews = async (id) => {
   try {
-    const response = await JikanAPI.get(`/anime/${id}/news`);
-    return response.data.data;
+    const data = await jikanApi.get(`/anime/${id}/news`, `jikan_anime_news_${id}`, 60);
+    return data;
   } catch (error) {
     console.error("Erro ao buscar notícias de animes:", error);
     throw error;
@@ -144,8 +156,8 @@ export const getAnimeNews = async (id) => {
 // Busca notícias de mangas
 export const getMangaNews = async (id) => {
   try {
-    const response = await JikanAPI.get(`/manga/${id}/news`);
-    return response.data.data;
+    const data = await jikanApi.get(`/manga/${id}/news`, `jikan_manga_news_${id}`, 60);
+    return data;
   } catch (error) {
     console.error("Erro ao buscar notícias de mangas:", error);
     throw error;
@@ -166,13 +178,12 @@ export const addToUserList = async (externalId, contentType) => {
   const userId = parsedData.id;
 
   try {
-      const response = await axios.post('http://localhost:3000/api/list', {
+      const response = await customAPI.post('/api/list', {
           userId,
           externalId,
           contentType,
       });
 
-     
       return response.data; // Retorna a resposta do servidor
   } catch (error) {
       console.error('Erro ao adicionar à lista:', error);
@@ -184,11 +195,10 @@ export const addToUserList = async (externalId, contentType) => {
   }
 };
 
-
 export const getUserList = async (userId, contentType) => { 
   try {
-    const response = await axios.get(`http://localhost:3000/api/list`, {
-      params: { userId, contentType }, // Remova externalId daqui
+    const response = await customAPI.get(`/api/list`, {
+      params: { userId, contentType },
     });
     return response.data; 
   } catch (error) {
@@ -200,7 +210,7 @@ export const getUserList = async (userId, contentType) => {
 //REMOVER OS ANIMES OU MANGAS QUE TENHO NA LISTA
 export const removeAnimeFromList = async (userId, animeId) => {
   try {
-    const response = await axios.delete(`http://localhost:3000/api/user/${userId}/anime/${animeId}`);
+    const response = await customAPI.delete(`/api/user/${userId}/anime/${animeId}`);
     return response.data;
   } catch (error) {
     console.error('Erro ao remover anime da lista:', error);
@@ -211,10 +221,25 @@ export const removeAnimeFromList = async (userId, animeId) => {
 export const removeMangaFromList = async (userId, mangaId) => { 
   console.log(`Removendo mangá com ID externo: ${mangaId}`); // Log do mangaId que está sendo passado
   try {
-    const response = await axios.delete(`http://localhost:3000/api/user/${userId}/manga/${mangaId}`);
+    const response = await customAPI.delete(`/api/user/${userId}/manga/${mangaId}`);
     return response.data;
   } catch (error) {
     console.error('Erro ao remover mangá da lista:', error);
+    throw error;
+  }
+};
+
+export const updateItemStatus = async (userId, externalId, contentType, status) => {
+  try {
+    const response = await customAPI.put('/api/list/status', {
+      userId,
+      externalId,
+      contentType,
+      status
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating item status:', error);
     throw error;
   }
 };

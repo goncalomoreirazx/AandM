@@ -1,7 +1,6 @@
-// src/components/RegisterModal.js
-'use client';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { useState } from 'react';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import registerlogo from '../assets/registerlogo.png';
 
 export default function RegisterModal({ isOpen, setIsOpen }) {
@@ -12,6 +11,16 @@ export default function RegisterModal({ isOpen, setIsOpen }) {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [errorMessage, setErrorMessage] = useState(''); // State para mensagens de erro
   const [successMessage, setSuccessMessage] = useState(''); // State para mensagens de sucesso
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -107,14 +116,14 @@ export default function RegisterModal({ isOpen, setIsOpen }) {
                         placeholder="Email address"
                       />
                     </div>
-                    <div className='mb-2 rounded-md'>
+                    <div className='mb-2 rounded-md relative'>
                       <label htmlFor="password" className="sr-only">
                         Password
                       </label>
                       <input
                         id="password"
                         name="password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         autoComplete="new-password"
                         required
                         value={password}
@@ -122,15 +131,26 @@ export default function RegisterModal({ isOpen, setIsOpen }) {
                         className="relative block w-full appearance-none border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                         placeholder="Password"
                       />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+                        onClick={togglePasswordVisibility}
+                      >
+                        {showPassword ? (
+                          <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                        ) : (
+                          <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                        )}
+                      </button>
                     </div>
-                    <div className='mb-2 rounded-md'>
+                    <div className='mb-2 rounded-md relative'>
                       <label htmlFor="confirm-password" className="sr-only">
                         Verify Password
                       </label>
                       <input
                         id="confirm-password"
                         name="confirm-password"
-                        type="password"
+                        type={showConfirmPassword ? "text" : "password"}
                         autoComplete="new-password"
                         required
                         value={confirmPassword}
@@ -138,6 +158,17 @@ export default function RegisterModal({ isOpen, setIsOpen }) {
                         className="relative block w-full appearance-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                         placeholder="Verify Password"
                       />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+                        onClick={toggleConfirmPasswordVisibility}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                        ) : (
+                          <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                        )}
+                      </button>
                     </div>
                   </div>
 
